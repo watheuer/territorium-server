@@ -2568,7 +2568,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        for (position = Index + 4; Index < position; Index++) {
 	                          charCode = source.charCodeAt(Index);
 	                          // A valid sequence comprises four hexdigits (case-
-	                          // insensitive) that form a single hexadecimal value.
+	                          // insensitive) that chatForm a single hexadecimal value.
 	                          if (!(charCode >= 48 && charCode <= 57 || charCode >= 97 && charCode <= 102 || charCode >= 65 && charCode <= 70)) {
 	                            // Invalid Unicode escape sequence.
 	                            abort();

@@ -1,16 +1,48 @@
-var socket = io();
-var form = document.getElementById('f');
-var input = document.getElementById('m');
-var messages = document.getElementById('messages');
+var socket = '';
+var connected = false;
+var chatForm = $('#f');
+var input = $('#m');
+var messages = $('#messages');
+var loginForm = $('#login');
 
-form.onsubmit = function() {
-    socket.emit('chat message', input.value);
-    input.value = '';
-    return false;
-};
+function connect_socket (token) {
+  socket = io.connect('', {
+    query: 'token=' + token
+  });
 
-socket.on('chat message', function(msg) {
-    var li = document.createElement('li');
-    li.appendChild(document.createTextNode(msg));
-    messages.appendChild(li);
+  socket.on('connect', function() {
+    console.log('authenticated');
+    connected = true;
+  }).on('disconnect', function() {
+    console.log('disconnected');
+  });
+
+  socket.on('chat message', function(msg) {
+    messages.append("<li>" + msg + "</li>");
+  });
+}
+
+loginForm.submit(function(e) {
+  e.preventDefault();
+  var username = $('#username').val();
+  var password = $('#password').val();
+
+  $.post('/auth/login', {
+    username: username,
+    password: password
+  }).done(function (result) {
+    // connect to socket with token
+    connect_socket(result.token);
+  });
 });
+
+chatForm.submit(function(e) {
+  e.preventDefault();
+  if (connected) {
+    socket.emit('chat message', input.val());
+    input.val('');
+  } else {
+    alert("Please log in.");
+  }
+});
+

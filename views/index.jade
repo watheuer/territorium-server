@@ -1,10 +1,16 @@
 extends layout
 
 block content
+    form#login(action="")
+        input#username
+        input#password
+        button Login
+
     ul#messages
     form#f(action="")
         input#m(autocomplete="off")
         button Send
 
     script(src='/javascripts/socket.io.js')
+    script(src='https://code.jquery.com/jquery-3.1.1.min.js')
     script(src='/javascripts/chat.js')

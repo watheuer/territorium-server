@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var socketioJwt = require('socketio-jwt');
 
 var app = express();
 var http = require('http');
@@ -12,6 +13,7 @@ var io = require('socket.io')(server);
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var auth = require('./routes/auth');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,19 +35,7 @@ app.set('port', port);
 // routers
 app.use('/', index);
 app.use('/users', users);
-
-io.on('connection', function(socket) {
-  console.log('a user connected');
-
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
-  });
-
-  socket.on('chat message', function(msg) {
-    console.log('message: ' + msg);
-    io.emit('chat message', msg);
-  });
-});
+app.use('/auth', auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -63,6 +53,25 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// web sockets
+io.set('authorization', socketioJwt.authorize({
+  secret: "lolnotreal",
+  handshake: true
+}));
+
+io.on('connection', function(socket) {
+  console.log("User connected");
+
+  socket.on('disconnect', function() {
+    console.log('user disconnected');
+  });
+
+  socket.on('chat message', function(msg) {
+    console.log('message: ' + msg);
+    io.emit('chat message', msg);
+  });
 });
 
 // create server
