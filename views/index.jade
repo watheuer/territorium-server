@@ -1,0 +1,10 @@
+extends layout
+
+block content
+    ul#messages
+    form#f(action="")
+        input#m(autocomplete="off")
+        button Send
+
+    script(src='/javascripts/socket.io.js')
+    script(src='/javascripts/chat.js')
