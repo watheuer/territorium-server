@@ -3,5 +3,6 @@
   ],
   "plugins": {
     "node": {}
-  }
+  },
+  "esversion": 6
 }

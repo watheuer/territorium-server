@@ -20,8 +20,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // get server port
-// var port = process.env.PORT;
-var port = '3000';
+var port = process.env.PORT;
 app.set('port', port);
 
 // routers

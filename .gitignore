@@ -49,3 +49,4 @@ jspm_packages
 # Intellij stuff
 .idea
 *.iml
+env.sh

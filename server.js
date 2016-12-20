@@ -26,6 +26,5 @@ io.on('connection', function(socket) {
 });
 
 // create server
-// var port = process.env.PORT;
-var port = '3000';
+var port = process.env.PORT;
 server.listen(port);
