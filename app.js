@@ -4,16 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var socketioJwt = require('socketio-jwt');
 
 var app = express();
-var http = require('http');
-var server = http.createServer(app);
-var io = require('socket.io')(server);
-
-var index = require('./routes/index');
-var users = require('./routes/users');
-var auth = require('./routes/auth');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,11 +20,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // get server port
-// var port = process.env.PORT
+// var port = process.env.PORT;
 var port = '3000';
 app.set('port', port);
 
 // routers
+var index = require('./routes/index');
+var users = require('./routes/users');
+var auth = require('./routes/auth');
 app.use('/', index);
 app.use('/users', users);
 app.use('/auth', auth);
@@ -55,24 +50,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// web sockets
-io.set('authorization', socketioJwt.authorize({
-  secret: "lolnotreal",
-  handshake: true
-}));
-
-io.on('connection', function(socket) {
-  console.log("User connected");
-
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
-  });
-
-  socket.on('chat message', function(msg) {
-    console.log('message: ' + msg);
-    io.emit('chat message', msg);
-  });
-});
-
-// create server
-server.listen(port);
+module.exports = app;
