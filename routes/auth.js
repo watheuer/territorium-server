@@ -1,28 +1,53 @@
 var express = require('express');
 var router = express.Router();
+var pool = require('../models/connectionPool');
+var User = require('../models/user');
+
 var jwt = require('jsonwebtoken');
-var jwtSecret = "lolnotreal";
+var jwtSecret = process.env.JWT_SECRET;
 
 /* POST login */
 router.post('/login', function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
-  console.log("login attempt: " + username + ", " + password);
 
-  // TODO: real authentication
-  if (username === "John" && password === "Doe") {
-    var profile = {
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@doe.com',
-      id: 123
-    };
+  pool.connect((err, client, done) => {
+    if (err) {
+      console.error(err);
+      res.sendStatus(500);
+    }
 
-    var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
-    res.json({token: token});
-  } else {
-    res.json({error: "Authentication failed."});
-  }
+    // query for user
+    var query = 'SELECT * FROM users WHERE username=\'' + username + '\'';
+    client.query(query, (err, result) => {
+      done(); // release db connection
+      if (err) {
+        console.error(err);
+        res.sendStatus(500);
+        return;
+      }
+      if (!result.rows.length) {
+        res.status(400).json({error: "User not found."});
+        return;
+      }
+
+      console.log(result);
+      var user = new User(result.rows[0].username, result.rows[0].password);
+
+      // send token for valid password
+      if (user.validPassword(password)) {
+        var profile = {
+          id: result.rows[0].id,
+          username: user.username
+        };
+        var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
+        res.json({token: token});
+      } else {
+        res.status(400).json({error: "Incorrect password."});
+      }
+      
+    }); 
+  });
 });
 
 module.exports = router;
