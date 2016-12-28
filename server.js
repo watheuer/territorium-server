@@ -31,7 +31,7 @@ io.on('connection', function(socket) {
   // subscribe to chat messages from redis
   subClient.subscribe('chats');
   subClient.on('message', (channel, message) => {
-    io.sockets.emit('chat', message);
+    socket.emit('chat', message);
   });
 
   // publish new chats
