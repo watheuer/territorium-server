@@ -6,10 +6,9 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var redis = require('redis');
 
-// 3 redis clients for value store, publish, and subscribe
-storeClient = redis.createClient();
-pubClient = redis.createClient();
-subClient = redis.createClient();
+// redis clients for value store, publish
+var storeClient = redis.createClient();
+var pubClient = redis.createClient();
 
 var app = express();
 
@@ -60,5 +59,4 @@ module.exports = {
   app: app,
   storeClient: storeClient,
   pubClient: pubClient,
-  subClient: subClient
 };

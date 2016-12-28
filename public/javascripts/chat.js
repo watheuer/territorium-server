@@ -19,7 +19,7 @@ function connect_socket (token) {
     console.log('disconnected');
   });
 
-  socket.on('chat message', function(msg) {
+  socket.on('chat', function(msg) {
     messages.append("<li>" + msg + "</li>");
   });
 }
@@ -41,7 +41,7 @@ loginForm.submit(function(e) {
 chatForm.submit(function(e) {
   e.preventDefault();
   if (connected) {
-    socket.emit('chat message', input.val());
+    socket.emit('chat', input.val());
     input.val('');
   } else {
     alert("Please log in.");

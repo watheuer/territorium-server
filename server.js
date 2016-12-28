@@ -1,8 +1,13 @@
 var socketioJwt = require('socketio-jwt');
 var http = require('http');
 var socketIo = require('socket.io');
+var appConfig = require('./app');
+var redis = require('redis');
 
-var app = require('./app').app;
+var app = appConfig.app;
+var pubClient = appConfig.pubClient;
+var storeClient = appConfig.storeClient;
+
 var server = http.createServer(app);
 var io = socketIo(server);
 
@@ -13,15 +18,35 @@ io.use(socketioJwt.authorize({
 }));
 
 io.on('connection', function(socket) {
-  console.log("User connected");
+  console.log('User connected');
+  var subClient = redis.createClient();
+  var token = socket.decoded_token;
 
-  socket.on('disconnect', function() {
-    console.log('user disconnected');
+  // update current users
+  storeClient.incr('users.num', (err, num) => {
+    console.log('Online users: ' + num);
+  });
+  storeClient.rpush('users.list', token.username);
+  
+  // subscribe to chat messages from redis
+  subClient.subscribe('chats');
+  subClient.on('message', (channel, message) => {
+    io.sockets.emit('chat', message);
   });
 
-  socket.on('chat message', function(msg) {
-    console.log('message: ' + msg);
-    io.emit('chat message', msg);
+  // publish new chats
+  socket.on('chat', function(msg) {
+    console.log(token.username + ': ' + msg);
+    pubClient.publish('chats', token.username + ': ' + msg);
+  });
+
+  socket.on('disconnect', function() {
+    console.log(token.username + ' disconnected');
+    storeClient.decr('users.num', (err, num) => {
+      console.log('Online users: ' + num);
+    });
+    subClient.quit();
+    pubClient.publish('chats', token.username + ' disconnected.');
   });
 });
 
