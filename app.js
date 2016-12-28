@@ -4,6 +4,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var redis = require('redis');
+
+// 3 redis clients for value store, publish, and subscribe
+storeClient = redis.createClient();
+pubClient = redis.createClient();
+subClient = redis.createClient();
 
 var app = express();
 
@@ -49,4 +55,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+
+module.exports = {
+  app: app,
+  storeClient: storeClient,
+  pubClient: pubClient,
+  subClient: subClient
+};

@@ -2,13 +2,13 @@ var socketioJwt = require('socketio-jwt');
 var http = require('http');
 var socketIo = require('socket.io');
 
-var app = require('./app');
+var app = require('./app').app;
 var server = http.createServer(app);
 var io = socketIo(server);
 
 // web sockets
-io.set('authorization', socketioJwt.authorize({
-  secret: "lolnotreal",
+io.use(socketioJwt.authorize({
+  secret: process.env.JWT_SECRET,
   handshake: true
 }));
 

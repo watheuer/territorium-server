@@ -15,8 +15,7 @@ router.post('/', function(req, res, next) {
   console.log('Saving user: %s', user.username);
   pool.connect((err, client, done) => {
     if (err) {
-      res.sendStatus(500);
-      return;
+      return res.sendStatus(500);
     }
 
     var query = 'INSERT INTO users (username, password) VALUES (\'' + user.username + '\', \'' + user.password + '\');';

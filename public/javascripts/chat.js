@@ -13,7 +13,9 @@ function connect_socket (token) {
   socket.on('connect', function() {
     console.log('authenticated');
     connected = true;
-  }).on('disconnect', function() {
+  });
+  
+  socket.on('disconnect', function() {
     console.log('disconnected');
   });
 

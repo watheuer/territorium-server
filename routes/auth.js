@@ -14,7 +14,7 @@ router.post('/login', function(req, res, next) {
   pool.connect((err, client, done) => {
     if (err) {
       console.error(err);
-      res.sendStatus(500);
+      return res.sendStatus(500);
     }
 
     // query for user
@@ -23,15 +23,12 @@ router.post('/login', function(req, res, next) {
       done(); // release db connection
       if (err) {
         console.error(err);
-        res.sendStatus(500);
-        return;
+        return res.sendStatus(500);
       }
       if (!result.rows.length) {
-        res.status(400).json({error: "User not found."});
-        return;
+        return res.status(400).json({error: "User not found."});
       }
 
-      console.log(result);
       var user = new User(result.rows[0].username, result.rows[0].password);
 
       // send token for valid password
@@ -45,7 +42,6 @@ router.post('/login', function(req, res, next) {
       } else {
         res.status(400).json({error: "Incorrect password."});
       }
-      
     }); 
   });
 });
