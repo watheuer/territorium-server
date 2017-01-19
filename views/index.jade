@@ -1,9 +1,14 @@
 extends layout
 
 block content
+    form#register(action="")
+        input#register-username
+        input#register-password(type="password")
+        button Register
+
     form#login(action="")
         input#username
-        input#password
+        input#password(type="password")
         button Login
 
     ul#messages

@@ -4,6 +4,7 @@ var chatForm = $('#f');
 var input = $('#m');
 var messages = $('#messages');
 var loginForm = $('#login');
+var registerForm = $('#register');
 
 function connect_socket (token) {
   socket = io.connect('', {
@@ -24,27 +25,49 @@ function connect_socket (token) {
   });
 }
 
+registerForm.submit(function(e) {
+  var username = $('#register-username').val();
+  var password = $('#register-password').val();
+
+  $.post('/users', {
+    username: username,
+    password: password
+  }).done(function(result) {
+    alert(result);
+  }).fail(function(err) {
+    alert(err.responseText);
+  });
+
+  registerForm.trigger('reset');
+  return false;
+});
+
 loginForm.submit(function(e) {
-  e.preventDefault();
   var username = $('#username').val();
   var password = $('#password').val();
 
   $.post('/auth/login', {
     username: username,
     password: password
-  }).done(function (result) {
+  }).done(function(result) {
     // connect to socket with token
     connect_socket(result.token);
+  }).fail(function(err) {
+    alert('Failed to log in.');
   });
+
+  loginForm.trigger('reset');
+  return false;
 });
 
 chatForm.submit(function(e) {
-  e.preventDefault();
   if (connected) {
     socket.emit('chat', input.val());
     input.val('');
   } else {
     alert("Please log in.");
   }
+
+  return false;
 });
 
