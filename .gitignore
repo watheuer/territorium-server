@@ -53,3 +53,5 @@ env.sh
 
 # Vim stuff
 *.swp
+
+dump.rdb

@@ -6,6 +6,17 @@ var messages = $('#messages');
 var loginForm = $('#login');
 var registerForm = $('#register');
 
+// setup canvas
+var canvas = document.getElementById('drawCanvas');
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "#FF0000";
+
+function draw_user(x, y) {
+  ctx.fillRect(x, y, 15, 15);
+}
+
+draw_user(100, 100);
+
 function connect_socket (token) {
   socket = io.connect('', {
     query: 'token=' + token
