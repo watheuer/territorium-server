@@ -18,9 +18,9 @@ io.use(socketioJwt.authorize({
 }));
 
 io.on('connection', function(socket) {
-  console.log('User connected');
   var subClient = redis.createClient();
   var token = socket.decoded_token;
+  console.log(token.username + ' connected');
 
   // update current users
   storeClient.incr('users.num', (err, num) => {
@@ -42,6 +42,9 @@ io.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     console.log(token.username + ' disconnected');
+    storeClient.lpop('users.list', (err, user) => {
+      console.log('User ' + user + ' disconnected.');
+    });
     storeClient.decr('users.num', (err, num) => {
       console.log('Online users: ' + num);
     });

@@ -29,10 +29,10 @@ router.post('/login', function(req, res, next) {
         return res.status(400).json({error: "User not found."});
       }
 
-      var user = new User(result.rows[0].username, result.rows[0].password);
+      var user = new User(result.rows[0].username, result.rows[0].password, true);
 
       // send token for valid password
-      if (user.validPassword(password)) {
+      if (User.validatePassword(password, user.password)) {
         var profile = {
           id: result.rows[0].id,
           username: user.username
