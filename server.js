@@ -57,6 +57,10 @@ io.on('connection', function(socket) {
     subClient.quit();
     pubClient.publish('chats', token.username + ' disconnected.');
   });
+
+  socket.on('player_update', function(player) {
+    io.sockets.emit('player_update', player);
+  });
 });
 
 // create server

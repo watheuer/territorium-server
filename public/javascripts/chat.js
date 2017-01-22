@@ -1,6 +1,9 @@
 var socket;
 var gameLoop;
 var connected = false;
+var players = new Map();
+var name;
+var currentPlayer;
 
 var chatForm = $('#f');
 var input = $('#m');
@@ -15,6 +18,15 @@ function connect_socket (token) {
 
   socket.on('connect', function() {
     console.log('authenticated');
+
+    currentPlayer = {
+      username: name,
+      x: 50.0,
+      y: 50.0,
+      dx: 0.0,
+      dy: 0.0
+    };
+
     gameLoop = setInterval(gameStep, 16);
     connected = true;
   });
@@ -26,6 +38,11 @@ function connect_socket (token) {
 
   socket.on('chat', function(msg) {
     messages.append("<li>" + msg + "</li>");
+  });
+
+  // update player
+  socket.on('player_update', function(player) {
+    players.set(player.username, player);
   });
 }
 
@@ -55,6 +72,7 @@ loginForm.submit(function(e) {
     password: password
   }).done(function(result) {
     // connect to socket with token
+    name = username;
     connect_socket(result.token);
   }).fail(function(err) {
     alert('Failed to log in.');
@@ -78,13 +96,6 @@ chatForm.submit(function(e) {
 
 // PLAYER STUFF
 
-var player = {
-  x: 50.0,
-  y: 50.0,
-  dx: 0.0,
-  dy: 0.0
-};
-
 var xVelocity = 1.5;
 var yVelocity = 1.5;
 
@@ -104,16 +115,16 @@ window.addEventListener("keyup", keyUp, false);
 function keyDown(e) {
   switch(e.keyCode) {
     case 87: //w
-      player.dy = -yVelocity;
+      currentPlayer.dy = -yVelocity;
       break;
     case 83: //s
-      player.dy = yVelocity;
+      currentPlayer.dy = yVelocity;
       break;
     case 68: //d
-      player.dx = xVelocity;
+      currentPlayer.dx = xVelocity;
       break;
     case 65: //a
-      player.dx = -xVelocity;
+      currentPlayer.dx = -xVelocity;
       break;
   }
 }
@@ -121,16 +132,16 @@ function keyDown(e) {
 function keyUp(e) {
   switch(e.keyCode) {
     case 87: //w
-      player.dy = 0.0;
+      currentPlayer.dy = 0.0;
       break;
     case 83: //s
-      player.dy = 0.0;
+      currentPlayer.dy = 0.0;
       break;
     case 68: //d
-      player.dx = 0.0;
+      currentPlayer.dx = 0.0;
       break;
     case 65: //a
-      player.dx = 0.0;
+      currentPlayer.dx = 0.0;
       break;
   }
 }
@@ -144,12 +155,15 @@ function gameStep() {
 }
 
 function logicStep() {
-  player.x += player.dx;
-  player.y += player.dy;
+  currentPlayer.x += currentPlayer.dx;
+  currentPlayer.y += currentPlayer.dy;
+  socket.emit('player_update', currentPlayer);  // emit currentPlayer location
 }
 
 function drawStep() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawUser(player.x, player.y);
+  players.forEach(function(player, id) {
+    drawUser(player.x, player.y);
+  });
 }
 
