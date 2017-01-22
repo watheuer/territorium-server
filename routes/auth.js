@@ -20,7 +20,7 @@ router.post('/login', function(req, res, next) {
     }
 
     // query for user
-    var query = 'SELECT * FROM users WHERE username=\'' + username + '\'';
+    var query = `SELECT * FROM users WHERE username='${username}'`;
     client.query(query, (err, result) => {
       done(); // release db connection
       if (err) {

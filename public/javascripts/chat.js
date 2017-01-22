@@ -1,21 +1,12 @@
-var socket = '';
+var socket;
+var gameLoop;
 var connected = false;
+
 var chatForm = $('#f');
 var input = $('#m');
 var messages = $('#messages');
 var loginForm = $('#login');
 var registerForm = $('#register');
-
-// setup canvas
-var canvas = document.getElementById('drawCanvas');
-var ctx = canvas.getContext("2d");
-ctx.fillStyle = "#FF0000";
-
-function draw_user(x, y) {
-  ctx.fillRect(x, y, 15, 15);
-}
-
-draw_user(100, 100);
 
 function connect_socket (token) {
   socket = io.connect('', {
@@ -24,11 +15,13 @@ function connect_socket (token) {
 
   socket.on('connect', function() {
     console.log('authenticated');
+    gameLoop = setInterval(gameStep, 16);
     connected = true;
   });
   
   socket.on('disconnect', function() {
     console.log('disconnected');
+    clearInterval(gameLoop);
   });
 
   socket.on('chat', function(msg) {
@@ -81,4 +74,82 @@ chatForm.submit(function(e) {
 
   return false;
 });
+
+
+// PLAYER STUFF
+
+var player = {
+  x: 50.0,
+  y: 50.0,
+  dx: 0.0,
+  dy: 0.0
+};
+
+var xVelocity = 1.5;
+var yVelocity = 1.5;
+
+// setup canvas
+var canvas = document.getElementById('drawCanvas');
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "#FF0000";
+
+function drawUser(x, y) {
+  ctx.fillRect(x, y, 15, 15);
+}
+
+// keydown events
+window.addEventListener("keydown", keyDown, false);
+window.addEventListener("keyup", keyUp, false);
+
+function keyDown(e) {
+  switch(e.keyCode) {
+    case 87: //w
+      player.dy = -yVelocity;
+      break;
+    case 83: //s
+      player.dy = yVelocity;
+      break;
+    case 68: //d
+      player.dx = xVelocity;
+      break;
+    case 65: //a
+      player.dx = -xVelocity;
+      break;
+  }
+}
+
+function keyUp(e) {
+  switch(e.keyCode) {
+    case 87: //w
+      player.dy = 0.0;
+      break;
+    case 83: //s
+      player.dy = 0.0;
+      break;
+    case 68: //d
+      player.dx = 0.0;
+      break;
+    case 65: //a
+      player.dx = 0.0;
+      break;
+  }
+}
+
+// GAME LOOP
+var gameLoop;
+
+function gameStep() {
+  logicStep();
+  drawStep();
+}
+
+function logicStep() {
+  player.x += player.dx;
+  player.y += player.dy;
+}
+
+function drawStep() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawUser(player.x, player.y);
+}
 

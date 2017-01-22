@@ -22,7 +22,7 @@ router.post('/', function(req, res, next) {
       return res.sendStatus(500);
     }
 
-    var query = 'INSERT INTO users (username, password) VALUES (\'' + user.username + '\', \'' + user.password + '\');';
+    var query = `INSERT INTO users (username, password) VALUES ('${user.username}', '${user.password}')`;
     client.query(query, (err, result) => {
       done();  // release db connection
       user.saved = true;
