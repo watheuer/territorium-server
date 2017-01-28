@@ -2,11 +2,15 @@ var express = require('express');
 var router = express.Router();
 var pool = require('../models/connectionPool');
 var User = require('../models/user');
+
+// TODO: redis?
 //var redisConfig = require('../redisConfig');
 //var storeClient = redisConfig.storeClient; 
 
 var jwt = require('jsonwebtoken');
 var jwtSecret = process.env.JWT_SECRET;
+
+var players = [];
 
 /* POST login */
 router.post('/login', function(req, res, next) {
@@ -33,16 +37,24 @@ router.post('/login', function(req, res, next) {
 
       // user object for existing user
       var user = new User(result.rows[0].username, result.rows[0].password, true);
+      user.id = result.rows[0].id;
+      // TODO: fix user constructor for row
 
       // validate password
       if (User.validatePassword(password, user.password)) {
-        // create token
-        var profile = {
-          id: result.rows[0].id,
-          username: user.username
-        };
-        var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
-        res.json({token: token});
+        if (players.indexOf(user.id) == -1) {
+          // create token
+          var profile = {
+            id: user.id,
+            username: user.username
+          };
+          var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
+
+          players.push(user.id);
+          res.json({token: token});
+        } else {
+          res.status(400).json({error: "User is already logged in."});
+        }
 
         // TODO: fix for no redis
         // check for user already logged in
@@ -60,9 +72,29 @@ router.post('/login', function(req, res, next) {
         //  }
         //});
       } else {
-        res.status(400).json({error: "Incorrect password."});
+        res.status(400).json({error: 'Incorrect password.'});
       }
     }); 
+  });
+});
+
+router.post('/logout', function(req, res, next) {
+  if (!req.body.token) {
+    return res.status(400).json({error: 'Please provide a valid token.'});
+  }
+
+  jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
+    if (err) {
+      res.status(400).json({error: 'Invalid token.'});
+    } else {
+      var index = players.indexOf(decoded.id);
+      if (index == -1) {
+        res.status(400).json({error: 'Not currently logged in.'});
+      } else {
+        players.splice(index, 1);
+        res.status(200).json({status: 'success'});
+      }
+    }
   });
 });
 
