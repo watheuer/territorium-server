@@ -87,6 +87,7 @@ router.post('/logout', function(req, res, next) {
     if (err) {
       res.status(400).json({error: 'Invalid token.'});
     } else {
+      // success
       var index = players.indexOf(decoded.id);
       if (index == -1) {
         res.status(400).json({error: 'Not currently logged in.'});
