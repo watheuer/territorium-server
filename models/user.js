@@ -38,17 +38,11 @@ class User extends Model {
     this.addColumn('email', email);
     this.addColumn('username', username);
     this.addColumn('password', password);
-    this.encrypted = false;
 
     // validators
     this.registerValidator(validateUsername);
     this.registerValidator(validatePassword);
     this.registerValidator(validateEmail);
-  }
-
-  get valid() {
-    if (this.saved) return true;
-    return super.valid;
   }
 
   get sendable() {
@@ -61,42 +55,18 @@ class User extends Model {
   }
 
   encryptPassword() {
-    if (!this.encrypted) {
+    if (!this.saved) {
       this.password = bcrypt.hashSync(this.password, bcrypt.genSaltSync(10));
-      this.encrypted = true;
     }
-  }
-
-  loadRow(row) {
-    super.loadRow(row);
-    this.encrypted = true;
-  }
-
-  static delete(id) {
-    // Return promise for postgres delete
-    return new Promise(function(resolve, reject) {
-      pool.connect((err, client, done) => {
-        if (err) {
-          reject(new Error('Could not connect to database.'));
-          return;
-        }
-
-        var query = `DELETE FROM users WHERE id='${id}'`;
-        client.query(query, (err, result) => {
-          done();  // release db connection
-          if (err) {
-            reject(new Error('Failed to delete user.'));
-          } else {
-            resolve(id);
-          }
-        });
-      });
-    });
   }
 
   static validatePassword(text, hashed) {
     //console.log(text, hashed);
     return bcrypt.compareSync(text, hashed);
+  }
+
+  static delete(id) {
+    return super.deleteFromTable('users', id);
   }
 }
 

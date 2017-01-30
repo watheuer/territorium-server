@@ -28,32 +28,38 @@ class Model {
   }
 
   get valid() {
+    if (this.saved) return true;
+
+    // check each property
     var ret = true;
     for (var i = 0; i < this.validators.length; i++) {
       if (!this.validators[i](this)) ret = false; 
     }
     return ret;
   }
+
   get dbColumns() {
     // get columns with id
     return this.saveColumns.concat('id');
   }
+
   addColumn(key, value) {
     this[key] = value;
     this.saveColumns.push(key);
   }
+
   loadRow(row) {
     Object.assign(this, row);
     this.saved = true;
   }
+
   registerValidator(func) {
-    // push validator function. should write error message to first argument
+    // push validator function
+    // this function should push error message to first argument
     this.validators.push(func);
   }
 
-  // database operations
   save() {
-    // Return promise for postgres insert
     var model = this;
     return new Promise(function(resolve, reject) {
       if (!model.valid) {
@@ -82,6 +88,27 @@ class Model {
             model.saved = true;
             model.loadRow(result.rows[0]);
             resolve(model);
+          }
+        });
+      });
+    });
+  }
+
+  static deleteFromTable(tableName, id) {
+    return new Promise(function(resolve, reject) {
+      pool.connect((err, client, done) => {
+        if (err) {
+          reject(new Error('Could not connect to database.'));
+          return;
+        }
+
+        var query = `DELETE FROM ${tableName} WHERE id='${id}'`;
+        client.query(query, (err, result) => {
+          done();  // release db connection
+          if (err) {
+            reject(new Error(`Failed to delete from ${tableName}.`));
+          } else {
+            resolve(id);
           }
         });
       });
