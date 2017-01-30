@@ -1,22 +1,56 @@
 var bcrypt = require('bcrypt-nodejs');
 var pool = require('./connectionPool');
+var validator = require('validator');
+var Model = require('./model');
 
-var usernameRegex = /^\w{6,16}$/;
-var passwordRegex = /^.{8,20}$/;
+const usernameRegex = /^\w{6,16}$/;
+const passwordRegex = /^.{8,128}$/; 
 
-class User {
-  constructor(username = null, password = null, saved = false) {
+function validateUsername(user) {
+  if (!usernameRegex.test(user.username)) {
+    user.errors.push('Invalid username.');
+    return false;
+  }
+  return true;
+}
+
+function validatePassword(user) {
+  if (!user.encrypted && !passwordRegex.test(user.password)) {
+    user.errors.push('Invalid password.');
+    return false;
+  }
+  return true;
+}
+
+function validateEmail(user) {
+  if (!validator.isEmail(user.email)) {
+    user.errors.push('Invalid email.');
+    return false;
+  }
+  return true;
+}
+
+class User extends Model {
+  constructor(email = null, username = null, password = null, saved = false) {
+    super();
+
+    // properties
     this.id = null;
+    this.email = email;
     this.username = username;
     this.password = password;
     this.saved = saved;
     this.encrypted = saved;
+
+    // validators
+    this.registerValidator(validateUsername);
+    this.registerValidator(validatePassword);
+    this.registerValidator(validateEmail);
   }
 
   get valid() {
     if (this.saved) return true;
-    return usernameRegex.test(this.username) && 
-           (passwordRegex.test(this.password) || this.encrypted);
+    return super.valid;
   }
 
   get sendable() {
@@ -49,7 +83,7 @@ class User {
           return;
         }
 
-        const query = `INSERT INTO users (username, password) VALUES ('${user.username}', '${user.password}') RETURNING id`;
+        const query = `INSERT INTO users (email, username, password) VALUES ('${user.email}', '${user.username}', '${user.password}') RETURNING id`;
         client.query(query, (err, result) => {
           done();  // release db connection
 

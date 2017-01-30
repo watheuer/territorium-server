@@ -5,45 +5,45 @@ var User = require('../models/user');
 describe('User', function() {
   describe('valid', function() {
     describe('username', function() {
-      it('rejects spaces', function() {
-        var user = new User('this is a bad username', 'password');
+      it('should reject spaces', function() {
+        var user = new User('good@email.com', 'this is a bad username', 'password');
         assert.equal(user.valid, false);
       });
 
-      it('allows underscores', function() {
-        var user = new User('this_is_fine', 'password');
+      it('should allow underscores', function() {
+        var user = new User('good@email.com', 'this_is_fine', 'password');
         assert.equal(user.valid, true);
       });
 
-      it('requires minimum length', function() {
-        var user = new User('2smal', 'password');
+      it('should require minimum length', function() {
+        var user = new User('good@email.com', '2smal', 'password');
         assert.equal(user.valid, false);
       });
 
-      it('has maximum length', function() {
-        var user = new User('my_name_is_far_too_long_muahaha', 'password');
+      it('should have maximum length', function() {
+        var user = new User('good@email.com', 'my_name_is_far_too_long_muahaha', 'password');
         assert.equal(user.valid, false);
       });
     });
 
     describe('password', function() {
-      it('accepts any characters', function() {
-        var user = new User('username', '$@#$*@# ($*&@(#))');
+      it('should accept any characters', function() {
+        var user = new User('good@email.com', 'username', '$@#$*@# ($*&@(#))');
         assert.equal(user.valid, true);
       });
 
-      it('must have minimum length', function() {
-        var user = new User('username', '2short');
+      it('should have minimum length', function() {
+        var user = new User('good@email.com', 'username', '2short');
         assert.equal(user.valid, false);
       });
 
-      it('has a maximum length', function() {
-        var user = new User('username', 'thispasswordiswaytoolongandshouldberejectedimo');
+      it('should have maximum length', function() {
+        var user = new User('good@email.com', 'username', 'ab'.repeat(128));
         assert.equal(user.valid, false);
       });
 
-      it('allows valid passwords', function() {
-        var user = new User('username', 'a_great_password12');
+      it('should allow valid passwords', function() {
+        var user = new User('good@email.com', 'username', 'a_great_password12');
         assert.equal(user.valid, true);
       });
     });
@@ -53,7 +53,7 @@ describe('User', function() {
     var id;
 
     it('should let me save this user', function(done) {
-      var user = new User('best_user', 'valid_password');
+      var user = new User('someone@test.com', 'best_user', 'valid_password');
       user.encryptPassword();
       console.log('valid: ' + user.valid + ', encrypted: ', user.encrypted);
       user.save().then(function(result) {
@@ -64,13 +64,12 @@ describe('User', function() {
       });
     });
 
-    it('should let me delete this user', function(done) {
+    it('should allow user to be deleted', function(done) {
       User.delete(id).then(function(result) {
         done();        
       }, function(err) {
         done(err);
       });
     });
-
   });
 });

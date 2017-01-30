@@ -8,7 +8,7 @@ var User = require('../models/user');
 //var storeClient = redisConfig.storeClient; 
 
 var jwt = require('jsonwebtoken');
-var jwtSecret = process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
 var players = [];
 

@@ -49,9 +49,12 @@ jspm_packages
 # Intellij stuff
 .idea
 *.iml
-env.sh
 
 # Vim stuff
 *.swp
 
 dump.rdb
+
+# env
+env.sh
+env_*.sh
