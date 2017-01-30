@@ -32,14 +32,12 @@ function validateEmail(user) {
 
 class User extends Model {
   constructor(email = null, username = null, password = null) {
-    super();
+    super('user', 'users'); // table name
 
     // properties
-    this.id = null;
-    this.email = email;
-    this.username = username;
-    this.password = password;
-    this.saved = false;
+    this.addColumn('email', email);
+    this.addColumn('username', username);
+    this.addColumn('password', password);
     this.encrypted = false;
 
     // validators
@@ -72,39 +70,6 @@ class User extends Model {
   loadRow(row) {
     super.loadRow(row);
     this.encrypted = true;
-  }
-
-  save() {
-    // Return promise for postgres insert
-    var user = this;
-    return new Promise(function(resolve, reject) {
-      if (!user.valid || !user.encrypted) {
-        reject(new Error('Invalid or unencrypted user.'));
-        return;
-      }
-
-      pool.connect((err, client, done) => {
-        if (err) {
-          reject(new Error('Could not connect to database.'));
-          return;
-        }
-
-        const query = `INSERT INTO users (email, username, password) VALUES ('${user.email}', '${user.username}', '${user.password}') RETURNING id`;
-        client.query(query, (err, result) => {
-          done();  // release db connection
-
-          if (err) {
-            reject(new Error('User with that username already exists.'));
-          } else {
-            // update object with saved and id
-            user.saved = true;
-            user.id = result.rows[0].id;
-
-            resolve(user);
-          }
-        });
-      });
-    });
   }
 
   static delete(id) {
