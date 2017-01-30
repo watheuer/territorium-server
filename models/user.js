@@ -31,7 +31,7 @@ function validateEmail(user) {
 }
 
 class User extends Model {
-  constructor(email = null, username = null, password = null, saved = false) {
+  constructor(email = null, username = null, password = null) {
     super();
 
     // properties
@@ -39,8 +39,8 @@ class User extends Model {
     this.email = email;
     this.username = username;
     this.password = password;
-    this.saved = saved;
-    this.encrypted = saved;
+    this.saved = false;
+    this.encrypted = false;
 
     // validators
     this.registerValidator(validateUsername);
@@ -57,6 +57,7 @@ class User extends Model {
     // Get an object that can be returned by JSON api (no password hash)
     return {
       id: this.id,
+      email: this.email,
       username: this.username
     };
   }
@@ -66,6 +67,11 @@ class User extends Model {
       this.password = bcrypt.hashSync(this.password, bcrypt.genSaltSync(10));
       this.encrypted = true;
     }
+  }
+
+  loadRow(row) {
+    super.loadRow(row);
+    this.encrypted = true;
   }
 
   save() {

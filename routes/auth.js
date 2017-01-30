@@ -29,34 +29,43 @@ router.post('/login', function(req, res, next) {
       done(); // release db connection
       if (err) {
         console.error(err);
-        return res.sendStatus(500);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Could not connect to database.'
+        });
       }
       if (!result.rows.length) {
-        return res.status(400).json({error: "User not found."});
+        return res.status(400).json({
+          status: 'error',
+          message: 'User not found.'
+        });
       }
 
       // user object for existing user
-      var user = new User(result.rows[0].username, result.rows[0].password, true);
-      user.id = result.rows[0].id;
-      // TODO: fix user constructor for row
+      var user = new User();
+      user.loadRow(result.rows[0]);
 
       // validate password
       if (User.validatePassword(password, user.password)) {
         if (players.indexOf(user.id) == -1) {
           // create token
-          var profile = {
-            id: user.id,
-            username: user.username
-          };
+          var profile = user.sendable;
           var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
 
           players.push(user.id);
-          res.json({token: token});
+          res.json({
+            status: 'success',
+            data: {
+              token: token
+            }
+          });
         } else {
-          res.status(400).json({error: "User is already logged in."});
+          res.status(400).json({
+            status: 'error',
+            message: 'User is already logged in.'
+          });
         }
 
-        // TODO: fix for no redis
         // check for user already logged in
         //storeClient.sismember('users.set', user.username, (err, ret) => {
         //  if (ret) {
@@ -72,7 +81,10 @@ router.post('/login', function(req, res, next) {
         //  }
         //});
       } else {
-        res.status(400).json({error: 'Incorrect password.'});
+        res.status(400).json({
+          status: 'error',
+          message: 'Incorrect password.'
+        });
       }
     }); 
   });
@@ -80,9 +92,13 @@ router.post('/login', function(req, res, next) {
 
 router.post('/logout', function(req, res, next) {
   if (!req.body.token) {
-    return res.status(400).json({error: 'Please provide a valid token.'});
+    return res.status(400).json({
+      status: 'error',
+      message: 'Please provide a valid token.'
+    });
   }
 
+  // verify token
   jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
     if (err) {
       res.status(400).json({error: 'Invalid token.'});
@@ -90,10 +106,16 @@ router.post('/logout', function(req, res, next) {
       // success
       var index = players.indexOf(decoded.id);
       if (index == -1) {
-        res.status(400).json({error: 'Not currently logged in.'});
+        res.status(400).json({
+          status: 'error',
+          message: 'Not currently logged in.'
+        });
       } else {
         players.splice(index, 1);
-        res.status(200).json({status: 'success'});
+        res.status(200).json({
+          status: 'success',
+          data: null
+        });
       }
     }
   });

@@ -15,6 +15,11 @@ class Model {
     return ret;
   }
 
+  loadRow(row) {
+    Object.assign(this, row);
+    this.saved = true;
+  }
+
   registerValidator(func) {
     // push validator function. should write error message to first argument
     this.validators.push(func);
