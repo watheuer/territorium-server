@@ -15,20 +15,20 @@ router.post('/', function(req, res, next) {
   var user = new User(email, username, password);
 
   if (!user.valid) {
-    return res.status(400).json({error: "Invalid username or password. Username must be 6 characters or longer, and password must by 8 characters or longer. Only alphanumeric characters and underscores are allowed."});
+    return res.status(400).json({
+      message: user.errors.join(' ')
+    });
   }
   user.encryptPassword();
   
   user.save().then(function(result) {
     res.json({
-      status: 'success',
       data: {
         user: result.sendable
       }
     });
   }, function(err) {
-    res.status(400).json({
-      status: 'error',
+    res.status(500).json({
       message: err.message 
     });
   });
@@ -36,21 +36,21 @@ router.post('/', function(req, res, next) {
 
 router.delete('/', function(req, res, next) {
   if (!req.body.token) {
-    return res.status(400).json({error: 'Please provide a valid token.'});
+    return res.status(400).json({
+      message: 'Please provide a token.'
+    });
   }
 
   jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
     if (err) {
-      res.status(400).json({error: 'Invalid token.'});
+      res.status(401).json({
+        message: 'Invalid token.'
+      });
     } else {
       User.delete(decoded.id).then(function(result) {
-        res.json({
-          status: 'success',
-          data: null
-        });
+        res.sendStatus(204); // success!
       }, function(err) {
-        res.status(400).json({
-          status: 'error',
+        res.status(404).json({
           message: err.message 
         });
       });

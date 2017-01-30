@@ -29,14 +29,10 @@ router.post('/login', function(req, res, next) {
       done(); // release db connection
       if (err) {
         console.error(err);
-        return res.status(500).json({
-          status: 'error',
-          message: 'Could not connect to database.'
-        });
+        return res.sendStatus(500);
       }
       if (!result.rows.length) {
-        return res.status(400).json({
-          status: 'error',
+        return res.status(404).json({
           message: 'User not found.'
         });
       }
@@ -48,20 +44,20 @@ router.post('/login', function(req, res, next) {
       // validate password
       if (User.validatePassword(password, user.password)) {
         if (players.indexOf(user.id) == -1) {
+          // append to logged in players
+          players.push(user.id);
+
           // create token
           var profile = user.sendable;
           var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
 
-          players.push(user.id);
           res.json({
-            status: 'success',
             data: {
               token: token
             }
           });
         } else {
           res.status(400).json({
-            status: 'error',
             message: 'User is already logged in.'
           });
         }
@@ -82,7 +78,6 @@ router.post('/login', function(req, res, next) {
         //});
       } else {
         res.status(400).json({
-          status: 'error',
           message: 'Incorrect password.'
         });
       }
@@ -93,29 +88,26 @@ router.post('/login', function(req, res, next) {
 router.post('/logout', function(req, res, next) {
   if (!req.body.token) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Please provide a valid token.'
+      message: 'Please provide a token.'
     });
   }
 
   // verify token
   jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
     if (err) {
-      res.status(400).json({error: 'Invalid token.'});
+      res.status(401).json({
+        message: 'Invalid token.'
+      });
     } else {
       // success
       var index = players.indexOf(decoded.id);
       if (index == -1) {
         res.status(400).json({
-          status: 'error',
           message: 'Not currently logged in.'
         });
       } else {
         players.splice(index, 1);
-        res.status(200).json({
-          status: 'success',
-          data: null
-        });
+        res.sendStatus(204);
       }
     }
   });
