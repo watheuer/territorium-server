@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": ". ./env_DEV.sh && nodemon app.js",
-    "test": ". ./env_TEST.sh && mocha"
+    "start": "node app.js",
+    "test": "mocha"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
