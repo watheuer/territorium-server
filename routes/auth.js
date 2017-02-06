@@ -12,7 +12,7 @@ var verifyLogin = require('../models/verifyLogin');
 var players = [];
 
 /* POST login */
-router.post('/login', function(req, res, next) {
+router.post('/login', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
@@ -84,7 +84,7 @@ router.post('/login', function(req, res, next) {
   });
 });
 
-router.post('/logout', verifyLogin, function(req, res, next) {
+router.post('/logout', verifyLogin, function(req, res) {
     var index = players.indexOf(req.decoded.id);
     if (index == -1) {
       res.status(400).json({

@@ -108,10 +108,14 @@ class Model {
           if (err) {
             reject(new Error(`${model.singularName} could not be found.`));
           } else {
-            // update object in memory
-            model.saved = true;
-            model.loadRow(result.rows[0]);
-            resolve(model);
+            if (result.rows.length === 0) {
+              reject(new Error(`${model.singularName} does not exist.`));
+            } else {
+              // update object in memory
+              model.saved = true;
+              model.loadRow(result.rows[0]);
+              resolve(model);
+            }
           }
         });
       });
