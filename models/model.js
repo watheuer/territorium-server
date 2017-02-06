@@ -93,6 +93,31 @@ class Model {
     });
   }
 
+  load(id) {
+    var model = this;
+    return new Promise(function(resolve, reject) {
+      pool.connect((err, client, done) => {
+        if (err) {
+          reject(new Error('Could not connect to database.'));
+          return;
+        }
+
+        const query = `SELECT * FROM ${model.tableName} WHERE id=${id}`;
+        client.query(query, (err, result) => {
+          done();  // release db connection
+          if (err) {
+            reject(new Error(`${model.singularName} could not be found.`));
+          } else {
+            // update object in memory
+            model.saved = true;
+            model.loadRow(result.rows[0]);
+            resolve(model);
+          }
+        });
+      });
+    });
+  }
+
   static deleteFromTable(tableName, id) {
     return new Promise(function(resolve, reject) {
       pool.connect((err, client, done) => {

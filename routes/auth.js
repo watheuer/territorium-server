@@ -7,8 +7,7 @@ var User = require('../models/user');
 //var redisConfig = require('../redisConfig');
 //var storeClient = redisConfig.storeClient; 
 
-var jwt = require('jsonwebtoken');
-const jwtSecret = process.env.JWT_SECRET;
+var verifyLogin = require('../models/verifyLogin');
 
 var players = [];
 
@@ -48,7 +47,7 @@ router.post('/login', function(req, res, next) {
           players.push(user.id);
 
           // create token
-          var profile = user.sendable;
+          var profile = user.serialize();
           var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
 
           res.json({
@@ -85,32 +84,16 @@ router.post('/login', function(req, res, next) {
   });
 });
 
-router.post('/logout', function(req, res, next) {
-  if (!req.body.token) {
-    return res.status(400).json({
-      message: 'Please provide a token.'
-    });
-  }
-
-  // verify token
-  jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
-    if (err) {
-      res.status(401).json({
-        message: 'Invalid token.'
+router.post('/logout', verifyLogin, function(req, res, next) {
+    var index = players.indexOf(req.decoded.id);
+    if (index == -1) {
+      res.status(400).json({
+        message: 'Not currently logged in.'
       });
     } else {
-      // success
-      var index = players.indexOf(decoded.id);
-      if (index == -1) {
-        res.status(400).json({
-          message: 'Not currently logged in.'
-        });
-      } else {
-        players.splice(index, 1);
-        res.sendStatus(204);
-      }
+      players.splice(index, 1);
+      res.sendStatus(204);
     }
-  });
 });
 
 module.exports = router;

@@ -45,8 +45,8 @@ class User extends Model {
     this.registerValidator(validateEmail);
   }
 
-  get sendable() {
-    // Get an object that can be returned by JSON api (no password hash)
+  serialize() {
+    // Serializer for JSON api (no password hash)
     return {
       id: this.id,
       email: this.email,

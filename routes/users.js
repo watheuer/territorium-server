@@ -1,13 +1,12 @@
 var express = require('express');
 var bcrypt = require('bcrypt-nodejs');
 var router = express.Router();
-var User = require('../models/user');
 
-var jwt = require('jsonwebtoken');
-var jwtSecret = process.env.JWT_SECRET;
+var User = require('../models/user');
+var verifyLogin = require('../models/verifyLogin.js');
 
 /* POST new user */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
   var email = req.body.email;
   var username = req.body.username;
   var password = req.body.password;
@@ -24,7 +23,7 @@ router.post('/', function(req, res, next) {
   user.save().then(function(result) {
     res.json({
       data: {
-        user: result.sendable
+        user: result.serialize()
       }
     });
   }, function(err) {
@@ -34,27 +33,28 @@ router.post('/', function(req, res, next) {
   });
 });
 
-router.delete('/', function(req, res, next) {
-  if (!req.body.token) {
-    return res.status(400).json({
-      message: 'Please provide a token.'
+router.get('/:userId', verifyLogin, function(req, res) {
+  var user = new User();
+  user.load(req.params.userId).then(function(result) {
+    res.json({
+      data: {
+        user: result.serialize()
+      }
     });
-  }
+  }, function(err) {
+    res.status(404).json({
+      message: err.message
+    });
+  });
+});
 
-  jwt.verify(req.body.token, jwtSecret, function(err, decoded) {
-    if (err) {
-      res.status(401).json({
-        message: 'Invalid token.'
-      });
-    } else {
-      User.delete(decoded.id).then(function(result) {
-        res.sendStatus(204); // success!
-      }, function(err) {
-        res.status(404).json({
-          message: err.message 
-        });
-      });
-    }
+router.delete('/', verifyLogin, function(req, res) {
+  User.delete(req.decoded.id).then(function(result) {
+    res.sendStatus(204); // success!
+  }, function(err) {
+    res.status(404).json({
+      message: err.message 
+    });
   });
 });
 
