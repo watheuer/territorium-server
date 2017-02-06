@@ -3,6 +3,9 @@ var router = express.Router();
 var pool = require('../models/connectionPool');
 var User = require('../models/user');
 
+var jwt = require('jsonwebtoken');
+var jwtSecret = process.env.JWT_SECRET;
+
 // TODO: redis?
 //var redisConfig = require('../redisConfig');
 //var storeClient = redisConfig.storeClient; 
