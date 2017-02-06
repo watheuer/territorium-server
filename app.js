@@ -28,7 +28,7 @@ app.set('port', port);
 var index = require('./routes/index');
 var users = require('./routes/users');
 var auth = require('./routes/auth');
-app.use('/', index);
+//app.use('/', index);
 app.use('/users', users);
 app.use('/auth', auth);
 

@@ -2,10 +2,12 @@ var loginForm = $('#login');
 var registerForm = $('#register');
 
 registerForm.submit(function(e) {
+  var email = $('#register-email').val();
   var username = $('#register-username').val();
   var password = $('#register-password').val();
 
   $.post('/users', {
+    email: email,
     username: username,
     password: password
   }).done(function(result) {

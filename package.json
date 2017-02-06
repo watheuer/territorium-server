@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "mocha"
+    "test": ". ./env_TEST.sh && mocha"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
