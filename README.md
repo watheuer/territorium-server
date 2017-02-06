@@ -2,6 +2,14 @@
 
 This server handles creating/deleting users and authentication for Territorium.
 
+# Authorization
+
+Routes that require authentication use the Authentication header:
+
+`Bearer <token>`
+
+This token is a standard JWT token that is retreived by logging in at `/auth/login`.
+
 ## Users
 
 ### POST /users
@@ -26,9 +34,30 @@ Error:
 
 ```
 
+### GET /users/:id
+```
+Required headers: Authorization
+
+Response:
+{
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "test@email.com",
+      "username": "username"
+    }
+  }
+}
+
+Error:
+{
+  "message": "user does not exist."
+}
+```
+
 ### DELETE /users
 ```
-Required parameters: token
+Required header: Authorization
 
 Response: 204
 
@@ -55,7 +84,7 @@ Response:
 
 ### POST /auth/logout
 ```
-Required parameters: token
+Required header: Authorization
 
 Response: 204
 
