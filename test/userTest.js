@@ -1,9 +1,11 @@
 var assert = require('assert');
 
 var User = require('../models/user');
+var Model = require('../models/model');
 
 const validEmail = 'good@email.com';
 const validUsername = 'username';
+const anotherValidUsername = 'username1';
 const validPassword = 'password';
 
 describe('User', function() {
@@ -56,6 +58,23 @@ describe('User', function() {
   describe('save', function() {
     var id;
 
+    // clear user table before and after
+    before(function(done) {
+      Model.clearTable('users').then(function() {
+        done();
+      }, function(err) {
+        done(err);
+      });
+    });
+
+    after(function(done) {
+      Model.clearTable('users').then(function() {
+        done();
+      }, function(err) {
+        done(err);
+      });
+    });
+
     it('should let me save this user', function(done) {
       var user = new User(validEmail, validUsername, validPassword);
       user.encryptPassword();
@@ -70,6 +89,22 @@ describe('User', function() {
     it('should allow user to be deleted', function(done) {
       User.delete(id).then(function(result) {
         done();        
+      }, function(err) {
+        done(err);
+      });
+    });
+
+    it('should not allow a user with an existing email', function(done) {
+      var user = new User(validEmail, validUsername, validPassword);
+      user.encryptPassword();
+      user.save().then(function(result) {
+        var badUser = new User(validEmail, anotherValidUsername, validPassword);
+        badUser.encryptPassword();
+        badUser.save().then(function(result) {
+          done(new Error('should not have saved'));
+        }, function(err) {
+          done();
+        });
       }, function(err) {
         done(err);
       });

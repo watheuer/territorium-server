@@ -81,8 +81,7 @@ class Model {
         client.query(query, (err, result) => {
           done();  // release db connection
           if (err) {
-            console.log(err.message);
-            reject(new Error(`${model.singularName} already exists.`));
+            reject(new Error(`${model.singularName} could not be saved.`));
           } else {
             // update object in memory
             model.saved = true;
@@ -109,6 +108,28 @@ class Model {
             reject(new Error(`Failed to delete from ${tableName}.`));
           } else {
             resolve(id);
+          }
+        });
+      });
+    });
+  }
+
+  // FOR TESTING ONLY, SERIOUSLY
+  static clearTable(tableName) {
+    return new Promise(function(resolve, reject) {
+      pool.connect((err, client, done) => {
+        if (err) {
+          reject(new Error('Could not connect to database.'));
+          return;
+        }
+
+        var query = `DELETE FROM ${tableName};`;
+        client.query(query, (err, result) => {
+          done();  // release db connection
+          if (err) {
+            reject(new Error(`Failed to delete from ${tableName}.`));
+          } else {
+            resolve();
           }
         });
       });
