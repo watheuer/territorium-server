@@ -24,6 +24,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 var port = process.env.PORT;
 app.set('port', port);
 
+// allow cross origin domain
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authentication");
+  next();
+});
+
 // routers
 var index = require('./routes/index');
 var users = require('./routes/users');
