@@ -15,7 +15,7 @@ class UserBatch {
         }
 
         const query = `SELECT * FROM USERS WHERE id=ANY($1)`;
-        client.query(query, [this.ids], (err, result) => {
+        client.query(query, [model.ids], (err, result) => {
           done();  // release db connection
           if (err) {
             reject(new Error(`Users could not be found.`));
@@ -23,7 +23,7 @@ class UserBatch {
             if (result.rows.length === 0) {
               reject(new Error(`None of these users exist.`));
             } else {
-              this.users = result.rows;
+              model.users = result.rows;
               resolve(result.rows);
             }
           }
