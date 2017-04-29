@@ -46,6 +46,7 @@ router.post('/login', function(req, res) {
       // validate password
       if (User.validatePassword(password, user.password)) {
         if (players.indexOf(user.id) == -1) {
+          // TODO: Change this so the user is logged out and re-logged in
           // append to logged in players
           players.push(user.id);
 

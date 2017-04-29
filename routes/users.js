@@ -33,7 +33,8 @@ router.post('/', function(req, res) {
   });
 });
 
-router.get('/:userId', verifyLogin, function(req, res) {
+//router.get('/:userId', verifyLogin, function(req, res) {
+router.get('/:userId', function(req, res) {
   var user = new User();
   user.load(req.params.userId).then(function(result) {
     res.json({
