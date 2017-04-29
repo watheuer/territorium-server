@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt-nodejs');
 var router = express.Router();
 
 var User = require('../models/user');
+var UserBatch = require('../models/userBatch');
 var verifyLogin = require('../models/verifyLogin.js');
 
 /* POST new user */
@@ -33,8 +34,7 @@ router.post('/', function(req, res) {
   });
 });
 
-//router.get('/:userId', verifyLogin, function(req, res) {
-router.get('/:userId', function(req, res) {
+router.get('/:userId', verifyLogin, function(req, res) {
   var user = new User();
   user.load(req.params.userId).then(function(result) {
     res.json({
@@ -48,6 +48,24 @@ router.get('/:userId', function(req, res) {
     });
   });
 });
+
+
+router.post('/batch/id', function(req, res) {
+  var ids = req.body.ids;
+  var userBatch = new UserBatch(ids);
+  userBatch.load().then(function(result) {
+    res.json({
+      data: {
+        users: result.serialize()
+      }
+    });
+  }, function(err) {
+    res.status(404).json({
+      message: err.message
+    });
+  });
+});
+
 
 router.delete('/', verifyLogin, function(req, res) {
   User.delete(req.decoded.id).then(function(result) {
