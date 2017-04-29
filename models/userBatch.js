@@ -24,7 +24,7 @@ class UserBatch {
               reject(new Error(`None of these users exist.`));
             } else {
               model.users = result.rows;
-              resolve(result.rows);
+              resolve(model);
             }
           }
         });
