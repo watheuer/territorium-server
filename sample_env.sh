@@ -1,5 +1,5 @@
 #!/bin/bash
-export PORT=3000
+export PORT=5001
 
 export DATABASE_URL=
 export DB_MAX_CONNECTIONS=10
