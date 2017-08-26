@@ -35,6 +35,9 @@ router.post('/', function(req, res) {
 });
 
 router.get('/:userId', verifyLogin, function(req, res) {
+  // TODO: This should be locked down to internal only
+  // We don't want spam, data mining, etc
+  // Also, shouldn't return email
   var user = new User();
   user.load(req.params.userId).then(function(result) {
     res.json({

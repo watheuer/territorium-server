@@ -3,6 +3,11 @@ var jwtSecret = process.env.JWT_SECRET;
 
 function verifyLogin(req, res, next) {
   var header = req.get('Authorization');
+  if (header === process.env.INTERNAL_SECRET){
+    // Used explicitly for internal API calls
+    next();
+    return true;
+  }
   if (!header || header.split(' ').length !== 2 || header.split(' ')[0] !== 'Bearer') {
     return res.status(400).json({
       message: 'Please provide a token.'
