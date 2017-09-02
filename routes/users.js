@@ -11,8 +11,12 @@ router.post('/', function(req, res) {
   var email = req.body.email;
   var username = req.body.username;
   var password = req.body.password;
+  
+  // TODO: This is just for alpha testing
+  var lat = 46.83375;
+  var lng = -121.94374;
 
-  var user = new User(email, username, password);
+  var user = new User(email, username, password, lat, lng);
 
   if (!user.valid) {
     return res.status(400).json({

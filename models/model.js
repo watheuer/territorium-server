@@ -81,6 +81,7 @@ class Model {
         client.query(query, (err, result) => {
           done();  // release db connection
           if (err) {
+            console.error(err);
             reject(new Error(`${model.singularName} could not be saved.`));
           } else {
             // update object in memory

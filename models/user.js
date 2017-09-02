@@ -3,7 +3,7 @@ var pool = require('./connectionPool');
 var validator = require('validator');
 var Model = require('./model');
 
-const usernameRegex = /^\w{6,16}$/;
+const usernameRegex = /^\w{3,16}$/;
 const passwordRegex = /^.{8,128}$/; 
 
 function validateUsername(user) {
@@ -31,13 +31,15 @@ function validateEmail(user) {
 }
 
 class User extends Model {
-  constructor(email = null, username = null, password = null) {
+  constructor(email = null, username = null, password = null, lat = null, lng = null) {
     super('user', 'users'); // table name
 
     // properties
     this.addColumn('email', email);
     this.addColumn('username', username);
     this.addColumn('password', password);
+    this.addColumn('lat', lat);
+    this.addColumn('lng', lng);
 
     // validators
     this.registerValidator(validateUsername);
@@ -50,7 +52,9 @@ class User extends Model {
     return {
       id: this.id,
       email: this.email,
-      username: this.username
+      username: this.username,
+      lat: this.lat,
+      lng: this.lng
     };
   }
 
@@ -61,7 +65,6 @@ class User extends Model {
   }
 
   static validatePassword(text, hashed) {
-    //console.log(text, hashed);
     return bcrypt.compareSync(text, hashed);
   }
 

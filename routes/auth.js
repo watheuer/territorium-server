@@ -6,6 +6,7 @@ var User = require('../models/user');
 var jwt = require('jsonwebtoken');
 var jwtSecret = process.env.JWT_SECRET;
 
+
 // TODO: redis?
 //var redisConfig = require('../redisConfig');
 //var storeClient = redisConfig.storeClient; 
@@ -25,10 +26,9 @@ router.post('/login', function(req, res) {
       return res.sendStatus(500);
     }
 
-    // query for user
     var query = `SELECT * FROM users WHERE username='${username}'`;
     client.query(query, (err, result) => {
-      done(); // release db connection
+      done();
       if (err) {
         console.error(err);
         return res.sendStatus(500);
@@ -46,8 +46,6 @@ router.post('/login', function(req, res) {
       // validate password
       if (User.validatePassword(password, user.password)) {
         if (players.indexOf(user.id) == -1) {
-          // TODO: Change this so the user is logged out and re-logged in
-          // append to logged in players
           players.push(user.id);
 
           // create token
@@ -57,28 +55,14 @@ router.post('/login', function(req, res) {
           res.json({
             data: {
               token: token
-            }
+            },
+            user: user.serialize()
           });
         } else {
           res.status(400).json({
             message: 'User is already logged in.'
           });
         }
-
-        // check for user already logged in
-        //storeClient.sismember('users.set', user.username, (err, ret) => {
-        //  if (ret) {
-        //    res.status(400).json({error: "User is already logged in."});
-        //  } else {
-        //    // create token
-        //    var profile = {
-        //      id: result.rows[0].id,
-        //      username: user.username
-        //    };
-        //    var token = jwt.sign(profile, jwtSecret, { expiresIn: "5h" });
-        //    res.json({token: token});
-        //  }
-        //});
       } else {
         res.status(400).json({
           message: 'Incorrect password.'
@@ -96,8 +80,34 @@ router.post('/logout', verifyLogin, function(req, res) {
       });
     } else {
       players.splice(index, 1);
-      res.sendStatus(204);
+      res.sendStatus(200);
     }
+});
+
+router.post('/internal/logout/:id', verifyLogin, function(req, res) {
+  var id = parseInt(req.params.id);
+  var lat = parseFloat(req.body.lat);
+  var lng = parseFloat(req.body.lng);
+  pool.connect((err, client, done) => {
+    if (err) {
+      console.error(err);
+    }
+    client.query("UPDATE users SET lat=$1, lng=$2 WHERE id=$3", [lat, lng, id], (err, result) => {
+      done();
+      if (err){
+        return console.error(err);;
+      }
+    });
+  });
+  var index = players.indexOf(id);
+  if (index == -1) {
+    res.status(400).json({
+      message: 'Not currently logged in.'
+    });
+  } else {
+    players.splice(index, 1);
+    res.sendStatus(200);
+  }
 });
 
 module.exports = router;
